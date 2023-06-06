@@ -20,13 +20,13 @@ tar -xf $FILENAME -C $TOMCATPATH --strip-components=1
 
 TOMCATUSERFILE=$TOMCATPATH/conf/tomcat-users.xml
 CONTEXTFILE=$TOMCATPATH/webapps/manager/META-INF/context.xml
+CHMODCP=$TOMCATPATH/conf/context.xml
 
+cp $HOME/git/onerun/onerun/tomcat-users.xml $TOMCATUSERFILE
+chown --reference=$CHMODCP $TOMCATUSERFILE
 
-cp $HOME/onerun/tomcat-users.xml $CONFIGURATIONFILE
-chown --reference=context.xml tomcat-users.xml
-
-cp $HOME/onerun/context.xml $CONTEXTFILE
-chown --reference=context.xml $CONFIGURATIONFILE 
+cp $HOME/git/onerun/onerun/context.xml $CONTEXTFILE
+chown --reference=$CHMODCP $CONTEXTFILE 
 
 
 $TOMCATPATH/bin/startup.sh
