@@ -1,13 +1,22 @@
 #!/bin/bash
 
-JAVAVERSION=$(java -version 2>&1 | awk -F '"' 'NR==1 {print $2}')
+JAVAPATH=/usr/bin/java
 
-if [ ${JAVAVERSION:0:2} -lt 11 ] 
+if [ -d $JAVAPATH ]
 then
-    sudo apt-get update
-    sudo apt-get install openjdk-11-jdk
+	echo "Java is installed!"
 else
-    echo "Java is installed"
+	sudo apt-get update
+        sudo apt-get install openjdk-11-jdk
+fi
+
+JAVAVERSION=$(java -version 2>&1 | awk -F '"' 'NR==1 {print $2}')
+if [ ${JAVAVERSION:0:2} -lt 11 ]
+then
+   	sudo apt-get update
+    	sudo apt-get install openjdk-11-jdk
+else
+	echo "JAVA version is 11 or higher, which is compatible!"
 fi
 
 TOMCATPATH=$HOME/tomcat9
