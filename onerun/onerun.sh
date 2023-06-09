@@ -1,16 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
-if which java > /dev/null 2>&1; 
+JAVAVERSION=$(java -version 2>&1 | awk -F '"' 'NR==1 {print $2}')
+
+if [ ${JAVAVERSION:0:2} -lt 11 ] 
 then
     sudo apt-get update
-	sudo apt-get install openjdk-11-jdk
+    sudo apt-get install openjdk-11-jdk
 else
-    echo "Java not installed"
+    echo "Java is installed"
 fi
 
-export TOMCATPATH=$HOME/tomcat9
+TOMCATPATH=$HOME/tomcat9
 
-if [ -d $TOMCATPATH  ]
+if [ -d $TOMCATPATH ]
 then
 	echo "Directory exists!"
 else
@@ -19,9 +21,9 @@ fi
 
 FILENAME=$TOMCATPATH'.tar.gz'
 
-if [ -f $FILENAME]
+if [ -f "$FILENAME" ]
 then
-	echo "File exists!"
+	echo "Tomcat file exists!"
 else
 	wget -O $FILENAME https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.75/bin/apache-tomcat-9.0.75.tar.gz
 	tar -xf $FILENAME -C $TOMCATPATH --strip-components=1
@@ -37,14 +39,21 @@ chown --reference=$CHMODCP $TOMCATUSERFILE
 cp $HOME/git/onerun/onerun/context.xml $CONTEXTFILE
 chown --reference=$CHMODCP $CONTEXTFILE 
 
-WEBAPPSPATH=$TOMCATPATH/webapps/
+WEBAPPSPATH=$TOMCATPATH/webapps
 
-if [ -d $TOMCATPATH/webapps/]
+if [ -d $WEBAPPSPATH ]
 then
+	echo "/webapps is exists! Checking Jenkins!"
 	JENKINNAME=$WEBAPPSPATH/jenkins.war
-	wget -O $JENKINNAME https://get.jenkins.io/war-stable/2.401.1/jenkins.war
+	if [ -f "$JENKINNAME" ]
+        then
+		echo "Jenkins file exists!"               
+	else
+		wget -O $JENKINNAME https://get.jenkins.io/war-stable/2.401.1/jenkins.war
+      	fi
 else
 	echo "No directory exists!"
+	
 fi
 
 $TOMCATPATH/bin/startup.sh
