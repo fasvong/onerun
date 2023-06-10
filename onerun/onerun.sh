@@ -65,4 +65,4 @@ else
 	
 fi
 
-$TOMCATPATH/bin/startup.sh
+sh $TOMCATPATH/bin/startup.sh
