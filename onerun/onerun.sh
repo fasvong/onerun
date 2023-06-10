@@ -1,23 +1,23 @@
 #!/bin/bash
 
-JAVAPATH=/usr/bin/java
+#JAVAPATH=/usr/bin/java
 
-if [ -d $JAVAPATH ]
-then
-	echo "Java is installed!"
-else
-	sudo apt-get -y  update
-        sudo apt-get -y  install openjdk-11-jdk
-fi
+#if [ -d $JAVAPATH ]
+#then
+#	echo "Java is installed!"
+#else
+#	sudo apt-get -y  update
+#        sudo apt-get -y  install openjdk-11-jdk
+#fi
 
-JAVAVERSION=$(java -version 2>&1 | awk -F '"' 'NR==1 {print $2}')
-if [ ${JAVAVERSION:0:2} -lt 11 ]
-then
-   	sudo apt-get -y  update
-    	sudo apt-get -y  install openjdk-11-jdk
-else
-	echo "JAVA version is 11 or higher, which is compatible!"
-fi
+#JAVAVERSION=$(java -version 2>&1 | awk -F '"' 'NR==1 {print $2}')
+#if [ ${JAVAVERSION:0:2} -lt 11 ]
+#then
+#   	sudo apt-get -y  update
+#    	sudo apt-get -y  install openjdk-11-jdk
+#else
+#	echo "JAVA version is 11 or higher, which is compatible!"
+#fi
 
 TOMCATPATH=$HOME/tomcat9
 
@@ -59,7 +59,7 @@ then
 		echo "Jenkins file exists!"               
 	else
 		wget -O $JENKINNAME https://get.jenkins.io/war-stable/2.401.1/jenkins.war
-      	fi
+      #	fi
 else
 	echo "No directory exists!"
 	
