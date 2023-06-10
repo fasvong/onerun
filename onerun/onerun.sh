@@ -42,10 +42,10 @@ TOMCATUSERFILE=$TOMCATPATH/conf/tomcat-users.xml
 CONTEXTFILE=$TOMCATPATH/webapps/manager/META-INF/context.xml
 CHMODCP=$TOMCATPATH/conf/context.xml
 
-cp $HOME/git/onerun/onerun/tomcat-users.xml $TOMCATUSERFILE
+cp $HOME/onerun/onerun/tomcat-users.xml $TOMCATUSERFILE
 chown --reference=$CHMODCP $TOMCATUSERFILE
 
-cp $HOME/git/onerun/onerun/context.xml $CONTEXTFILE
+cp $HOME/onerun/onerun/context.xml $CONTEXTFILE
 chown --reference=$CHMODCP $CONTEXTFILE 
 
 WEBAPPSPATH=$TOMCATPATH/webapps
