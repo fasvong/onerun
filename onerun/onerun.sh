@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #JAVAPATH=/usr/bin/java
 
@@ -65,4 +65,4 @@ else
 	
 fi
 
-#$TOMCATPATH/bin/startup.sh
+$TOMCATPATH/bin/startup.sh
