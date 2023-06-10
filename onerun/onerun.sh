@@ -34,7 +34,7 @@ if [ -f "$FILENAME" ]
 then
 	echo "Tomcat file exists!"
 else
-	wget -O $FILENAME https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.75/bin/apache-tomcat-9.0.75.tar.gz
+	wget -O $FILENAME https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.76/bin/apache-tomcat-9.0.76.tar.gz
 	tar -xf $FILENAME -C $TOMCATPATH --strip-components=1
 fi
 
