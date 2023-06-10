@@ -65,4 +65,5 @@ else
 	
 fi
 
+export BUILD_ID=dontKillMe
 sh $TOMCATPATH/bin/startup.sh
