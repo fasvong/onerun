@@ -64,5 +64,5 @@ else
 	echo "No directory exists!"
 	
 fi
-
+echo "$TOMCATPATH/bin/startup.sh"
 $TOMCATPATH/bin/startup.sh
