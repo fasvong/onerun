@@ -59,7 +59,7 @@ then
 		echo "Jenkins file exists!"               
 	else
 		wget -O $JENKINNAME https://get.jenkins.io/war-stable/2.401.1/jenkins.war
-      #	fi
+      	fi
 else
 	echo "No directory exists!"
 	
