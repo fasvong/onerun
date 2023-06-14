@@ -93,56 +93,62 @@ else
     
     if [ -f "$TOMCATFILE" ]
     then
-		TOMCATFILESIZE=${stat -c%s $TOMCATFILE}
-		if [ $TOMCATFILESIZE -le 0 ]
-		then
-			echo "Error: TOMCAT tar file size is 0"
-			exit 1
-		else
-			echo "Tomcat file exists!"
-		fi
+	    TOMCATFILESIZE=$(stat -c%s $TOMCATFILE)
+	    if [ $TOMCATFILESIZE -le 0 ]
+	    then
+		    echo "Error: TOMCAT tar file size is 0"
+
+		    exit 1
+	    else
+		    echo "Tomcat file exists!"
+	    fi
     else
-        wget -O $TOMCATFILE https://dlcdn.apache.org/tomcat/tomcat-9/v$tomcat_version/bin/apache-tomcat-$tomcat_version.tar.gz
-		TOMCATFILESIZE=${stat -c%s $TOMCATFILE}
-		if [ $TOMCATFILESIZE -le 0 ]
-		then
-			echo "Error: TOMCAT tar file size is 0"
-			exit 1
-		else
-			tar -xf $TOMCATFILE -C $TOMCATPATH --strip-components=1
-		fi
+    	    wget -O $TOMCATFILE https://dlcdn.apache.org/tomcat/tomcat-9/v$tomcat_version/bin/apache-tomcat-$tomcat_version.tar.gz
+    	    TOMCATFILESIZE=$(stat -c%s $TOMCATFILE)
+	    if [ $TOMCATFILESIZE -le 0 ]
+	    then
+		    echo "Error: TOMCAT tar file size is 0"
+		    exit 1
+	    else
+		    tar -xf $TOMCATFILE -C $TOMCATPATH --strip-components=1
+	    fi
     fi
-    
+
     TOMCATUSERFILE=$TOMCATPATH/conf/tomcat-users.xml
     CONTEXTFILE=$TOMCATPATH/webapps/manager/META-INF/context.xml
     CHMODCP=$TOMCATPATH/conf/context.xml
     
-	if [ -f "$HOME/onerun/onerun/tomcat-users.xml" ]
-	then
-		cp $HOME/onerun/onerun/tomcat-users.xml $TOMCATUSERFILE
-		chown --reference=$CHMODCP $TOMCATUSERFILE
-	else
-		echo "File is not exists!"
-		exit 1
-	fi
+    if [ -f "$HOME/onerun/onerun/tomcat-users.xml" ]
+    then
+	    cp $HOME/onerun/onerun/tomcat-users.xml $TOMCATUSERFILE
+	    chown --reference=$CHMODCP $TOMCATUSERFILE
+    else
+	    echo "File is not exists!"
+	    exit 1
+    fi
     
     if [ -f "$HOME/onerun/onerun/context.xml" ]
-	then
-		cp $HOME/onerun/onerun/context.xml $CONTEXTFILE
-		chown --reference=$CHMODCP $CONTEXTFILE
-	else
-		echo "File is not exists!"
-		exit 1
-	fi
-     
+    then
+	    cp $HOME/onerun/onerun/context.xml $CONTEXTFILE
+	    chown --reference=$CHMODCP $CONTEXTFILE
+    else
+	    echo "File is not exists!"
+	    exit 1
+    fi  
     #TOMCAT
     
     #JENKINS
     WEBAPPSPATH=$TOMCATPATH/webapps
     
     #Create Archive folder in webapps
-    mkdir $WEBAPPSPATH/Archive
-	ARCHIVEPATH=$WEBAPPSPATH/Archive
+    if [ -d $WEBAPPSPATH/Archive ]
+    then
+	    echo "Archived for Jenkins already created!"
+    else
+	    mkdir $WEBAPPSPATH/Archive
+    fi
+    
+    ARCHIVEPATH=$WEBAPPSPATH/Archive
     #Create Archive folder in webapps
     
     if [ -d $WEBAPPSPATH ]
@@ -150,36 +156,38 @@ else
         echo "/webapps is exists! Checking Jenkins!"
         JENKINNAME=$WEBAPPSPATH/jenkins.war
         if [ -f "$JENKINNAME" ]
+	then
+		JENKINSFILESIZE=$(stat -c%s $JENKINNAME)
+		if [ $JENKINSFILESIZE -le 0 ]
 		then
-			JENKINSFILESIZE=${stat -c%s $JENKINNAME}
-			if [ $JENKINSFILESIZE -le 0 ]
-			then
-				echo "Error: JENKINS file size is 0"
-				exit 1
-			else
-				echo "Jenkins file exists! Please help to add version jenkins and move it to Archive!"
-			fi
-        else
-            wget -O $JENKINNAME https://get.jenkins.io/war-stable/$jenkins_version/jenkins.war
-			JENKINSFILESIZE=${stat -c%s $JENKINNAME}
-			if [ $JENKINSFILESIZE -le 0 ]
-			then
-				echo "Error: JENKINS file size is 0"
-				exit 1
-			else
-			cp $JENKINNAME $ARCHIVEPATH/jenkins-$jenkins_version.war
-            fi
+			echo "Error: JENKINS file size is 0"
+			exit $1
+		else
+			echo "Jenkins file exists! Please help to add version jenkins and move it to Archive!"
+		fi
+	else
+		wget -O $JENKINNAME https://get.jenkins.io/war-stable/$jenkins_version/jenkins.war
+    		JENKINSFILESIZE=$(stat -c%s $JENKINNAME)
+    		if [ $JENKINSFILESIZE -le 0 ]
+    		then
+    			echo "Error: JENKINS file size is 0"
+    			exit $1
+    		else
+    			cp $JENKINNAME $ARCHIVEPATH/jenkins-$jenkins_version.war
+		fi
+	fi
     else
-        echo "No directory exists!"
+	echo "No directory exists!"
     fi
+
     #JENKINS
     
     #START TOMCAT SERVICE
     export BUILD_ID=dontKillMe
     sh $TOMCATPATH/bin/startup.sh
     #START TOMCAT SERVICE
-	
-	#Remove war file after move to archive
-	rm -f $JENKINNAME
-	#Remove war file after move to archive
+
+    #Remove war file after move to archive
+    rm -f $JENKINNAME
+    #Remove war file after move to archive
 fi
