@@ -97,19 +97,22 @@ else
 	    if [ $TOMCATFILESIZE -le 0 ]
 	    then
 		    echo "Error: TOMCAT tar file size is 0"
-
+		    rm -f $TOMCATFILE
 		    exit 1
 	    else
 		    echo "Tomcat file exists!"
 	    fi
     else
+	    echo "Tomcat is not exists. Downloading Tomcat"
     	    wget -O $TOMCATFILE https://dlcdn.apache.org/tomcat/tomcat-9/v$tomcat_version/bin/apache-tomcat-$tomcat_version.tar.gz
     	    TOMCATFILESIZE=$(stat -c%s $TOMCATFILE)
 	    if [ $TOMCATFILESIZE -le 0 ]
 	    then
 		    echo "Error: TOMCAT tar file size is 0"
+		    rm -f $TOMCATFILE
 		    exit 1
 	    else
+		    echo "Download completed. Extracting Tomcat"
 		    tar -xf $TOMCATFILE -C $TOMCATPATH --strip-components=1
 	    fi
     fi
@@ -120,6 +123,7 @@ else
     
     if [ -f "$HOME/onerun/onerun/tomcat-users.xml" ]
     then
+	    echo "Replace tomcat-users file"
 	    cp $HOME/onerun/onerun/tomcat-users.xml $TOMCATUSERFILE
 	    chown --reference=$CHMODCP $TOMCATUSERFILE
     else
@@ -129,6 +133,7 @@ else
     
     if [ -f "$HOME/onerun/onerun/context.xml" ]
     then
+	    echo "Replace Context file"
 	    cp $HOME/onerun/onerun/context.xml $CONTEXTFILE
 	    chown --reference=$CHMODCP $CONTEXTFILE
     else
@@ -145,6 +150,7 @@ else
     then
 	    echo "Archived for Jenkins already created!"
     else
+	    echo "Create Archive folder in webapps"
 	    mkdir $WEBAPPSPATH/Archive
     fi
     
@@ -154,40 +160,81 @@ else
     if [ -d $WEBAPPSPATH ]
     then
         echo "/webapps is exists! Checking Jenkins!"
-        JENKINNAME=$WEBAPPSPATH/jenkins.war
-        if [ -f "$JENKINNAME" ]
+        JENKINSFILE=$WEBAPPSPATH/jenkins.war
+        if [ -f "$JENKINSFILE" ]
 	then
-		JENKINSFILESIZE=$(stat -c%s $JENKINNAME)
+		JENKINSFILESIZE=$(stat -c%s $JENKINSFILE)
 		if [ $JENKINSFILESIZE -le 0 ]
 		then
 			echo "Error: JENKINS file size is 0"
-			exit $1
+			rm -f $JENKINSFILE
+			#reverse
+			old_version_file=$ARCHIVEPATH/$(ls -t "$ARCHIVEPATH" | head -n 1)
+                        if [ -f "$old_version_file" ]
+                        then
+                                echo "Reverse back to the old version jenkins in Archive"
+                                cp $old_version_file $JENKINSFILE
+                        else
+                                echo "No file in Archive, aborted!"
+                                exit $1
+                        fi
+			#reverse
 		else
 			echo "Jenkins file exists! Please help to add version jenkins and move it to Archive!"
 		fi
 	else
-		wget -O $JENKINNAME https://get.jenkins.io/war-stable/$jenkins_version/jenkins.war
-    		JENKINSFILESIZE=$(stat -c%s $JENKINNAME)
+		echo "Jenkins file is not exists. Downloading Jenkins"
+		wget -O $JENKINSFILE https://get.jenkins.io/war-stable/$jenkins_version/jenkins.war
+    		JENKINSFILESIZE=$(stat -c%s $JENKINSFILE)
     		if [ $JENKINSFILESIZE -le 0 ]
     		then
     			echo "Error: JENKINS file size is 0"
-    			exit $1
+			rm -f $JENKINSFILE
+			#reverse
+			old_version_file=$ARCHIVEPATH/$(ls -t "$ARCHIVEPATH" | head -n 1)
+			if [ -f "$old_version_file" ]
+			then
+				echo "Reverse back to the old version jenkins in Archive"
+				cp $old_version_file $JENKINSFILE
+			else
+				echo "No file in Archive, aborted!"
+				exit $1
+			fi
+			#reverse
     		else
-    			cp $JENKINNAME $ARCHIVEPATH/jenkins-$jenkins_version.war
+			echo "Copy Jenkins to Archive folder to backup"
+    			cp $JENKINSFILE $ARCHIVEPATH/jenkins-$jenkins_version.war
 		fi
 	fi
     else
-	echo "No directory exists!"
+	echo "No directory exists! Missing file while extract Tomcat!"
+	exit $1
     fi
 
     #JENKINS
     
     #START TOMCAT SERVICE
+    echo "Start Tomcat service"
     export BUILD_ID=dontKillMe
     sh $TOMCATPATH/bin/startup.sh
     #START TOMCAT SERVICE
 
     #Remove war file after move to archive
-    rm -f $JENKINNAME
+    echo "Wait for Jenkins to deploy"
+    timeout_session=60
+    JENKINSFOLDER=$WEBAPPSPATH/jenkins
+
+    while [ $timeout_session -gt 0 ];
+    do
+	    if [ -d $JENKINSFOLDER ]
+	    then
+		    echo "Jenkins has been deployed. Remove war file."
+		    rm -f $JENKINSFILE
+		    exit 1
+	    else
+		    sleep 1
+	   fi
+	   timeout_session=$(expr $timeout_session - 1)
+    done
     #Remove war file after move to archive
 fi
