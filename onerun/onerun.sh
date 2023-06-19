@@ -144,7 +144,7 @@ else
     
     #JENKINS
     WEBAPPSPATH=$TOMCATPATH/webapps
-    
+
     #Create Archive folder in webapps
     if [ -d $WEBAPPSPATH/Archive ]
     then
@@ -180,7 +180,30 @@ else
                         fi
 			#reverse
 		else
-			echo "Jenkins file exists! Please help to add version jenkins and move it to Archive!"
+			echo "Jenkins file exists! Remove the exists one and download new file!"
+			rm -f $JENKINSFILE
+			echo "Downloading Jenkins"
+			wget -O $JENKINSFILE https://get.jenkins.io/war-stable/$jenkins_version/jenkins.war
+                	JENKINSFILESIZE=$(stat -c%s $JENKINSFILE)
+                	if [ $JENKINSFILESIZE -le 0 ]
+                	then
+                        	echo "Error: JENKINS file size is 0"
+                        	rm -f $JENKINSFILE
+                        	#reverse
+                        	old_version_file=$ARCHIVEPATH/$(ls -t "$ARCHIVEPATH" | head -n 1)
+                        	if [ -f "$old_version_file" ]
+                        	then
+                                	echo "Reverse back to the old version jenkins in Archive"
+                                	cp $old_version_file $JENKINSFILE
+                        	else
+                                	echo "No file in Archive, aborted!"
+                                	exit $1
+                        	fi
+                        	#reverse
+                	else
+                        	echo "Copy Jenkins to Archive folder to backup"
+                        	cp $JENKINSFILE $ARCHIVEPATH/jenkins-$jenkins_version.war
+                	fi
 		fi
 	else
 		echo "Jenkins file is not exists. Downloading Jenkins"
@@ -221,20 +244,24 @@ else
 
     #Remove war file after move to archive
     echo "Wait for Jenkins to deploy"
-    timeout_session=60
     JENKINSFOLDER=$WEBAPPSPATH/jenkins
+    timeout_session=120
 
     while [ $timeout_session -gt 0 ];
     do
-	    if [ -d $JENKINSFOLDER ]
+    	if [ -d $JENKINSFOLDER ]
+    	then
+	    JENKINSFOLDERSIZE=$(stat -c%s $JENKINSFOLDER) 
+	    if [ $JENKINSFOLDERSIZE -gt 0 ]
 	    then
 		    echo "Jenkins has been deployed. Remove war file."
-		    rm -f $JENKINSFILE
-		    exit 1
 	    else
-		    sleep 1
-	   fi
-	   timeout_session=$(expr $timeout_session - 1)
+		    echo "Please wait a moment. Jenkins is deploying..."
+	    fi
+	    exit 1
+	else
+	    sleep 1
+	fi
+	timeout_session=$(expr $timeout_session - 1)
     done
-    #Remove war file after move to archive
 fi
