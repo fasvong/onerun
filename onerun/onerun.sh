@@ -244,24 +244,21 @@ else
 
     #Remove war file after move to archive
     echo "Wait for Jenkins to deploy"
-    JENKINSFOLDER=$WEBAPPSPATH/jenkins
-    timeout_session=120
 
-    while [ $timeout_session -gt 0 ];
-    do
-    	if [ -d $JENKINSFOLDER ]
-    	then
-	    JENKINSFOLDERSIZE=$(stat -c%s $JENKINSFOLDER) 
-	    if [ $JENKINSFOLDERSIZE -gt 0 ]
-	    then
-		    echo "Jenkins has been deployed. Remove war file."
-	    else
-		    echo "Please wait a moment. Jenkins is deploying..."
-	    fi
-	    exit 1
-	else
-	    sleep 1
-	fi
-	timeout_session=$(expr $timeout_session - 1)
-    done
+    tomcat_logs="$TOMCATPATH/logs/catalina.out"
+    # Deploy the WAR file to Tomcat
+    # ...
+    # Function to check if deployment is complete
+    check_deployment() 
+    {
+  	    # Wait for deployment messages in the Tomcat logs
+    	while ! grep -q "Jenkins is fully up and running" "$tomcat_logs";
+	do
+		sleep 1
+	done
+	echo "Jenkins deployment is complete."
+    }
+	# Call the function to check deployment
+	check_deployment
+
 fi
