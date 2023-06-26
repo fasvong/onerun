@@ -168,6 +168,10 @@ else
 		then
 			echo "Error: JENKINS file size is 0"
 			rm -f $JENKINSFILE
+			if [ -d $WEBAPPSPATH/jenkins ]
+			then
+				rm -rf $WEBAPPSPATH/jenkins
+			fi
 			#reverse
 			old_version_file=$ARCHIVEPATH/$(ls -t "$ARCHIVEPATH" | head -n 1)
                         if [ -f "$old_version_file" ]
@@ -182,6 +186,10 @@ else
 		else
 			echo "Jenkins file exists! Remove the exists one and download new file!"
 			rm -f $JENKINSFILE
+			if [ -d $WEBAPPSPATH/jenkins ]
+                        then
+                                rm -rf $WEBAPPSPATH/jenkins
+                        fi
 			echo "Downloading Jenkins"
 			wget -O $JENKINSFILE https://get.jenkins.io/war-stable/$jenkins_version/jenkins.war
                 	JENKINSFILESIZE=$(stat -c%s $JENKINSFILE)
@@ -189,6 +197,10 @@ else
                 	then
                         	echo "Error: JENKINS file size is 0"
                         	rm -f $JENKINSFILE
+				if [ -d $WEBAPPSPATH/jenkins ]
+				then
+					rm -rf $WEBAPPSPATH/jenkins
+				fi
                         	#reverse
                         	old_version_file=$ARCHIVEPATH/$(ls -t "$ARCHIVEPATH" | head -n 1)
                         	if [ -f "$old_version_file" ]
@@ -213,6 +225,10 @@ else
     		then
     			echo "Error: JENKINS file size is 0"
 			rm -f $JENKINSFILE
+			if [ -d $WEBAPPSPATH/jenkins ]
+                        then
+                                rm -rf $WEBAPPSPATH/jenkins
+                        fi
 			#reverse
 			old_version_file=$ARCHIVEPATH/$(ls -t "$ARCHIVEPATH" | head -n 1)
 			if [ -f "$old_version_file" ]
@@ -245,20 +261,22 @@ else
     #Remove war file after move to archive
     echo "Wait for Jenkins to deploy"
 
-    tomcat_logs="$TOMCATPATH/logs/catalina.out"
     # Deploy the WAR file to Tomcat
     # ...
-    # Function to check if deployment is complete
-    check_deployment() 
-    {
-  	    # Wait for deployment messages in the Tomcat logs
-    	while ! grep -q "Jenkins is fully up and running" "$tomcat_logs";
-	do
-		sleep 1
-	done
-	echo "Jenkins deployment is complete."
-    }
-	# Call the function to check deployment
-	check_deployment
+    # Wait for deployment messages in the Tomcat logs
+    website="http:/192.168.43.130:8080/jenkins"
+    # Specify the username and password for authentication
+    username="admin"
+    password="admin"
+
+    # Send a request to the website with authentication and check the response code
+    response=$(curl -sL -w "%{http_code}" -u "$username:$password" "$website" -o /dev/null)
+    echo $response
+    while [ "$response" -eq 200  ]
+    do
+	    sleep 1
+    done 
+    echo "Jenkins has been deployed. Website is online now."
+    # Deploy the WAR file to Tomcat
 
 fi
