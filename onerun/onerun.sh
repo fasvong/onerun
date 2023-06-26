@@ -259,24 +259,24 @@ else
     #START TOMCAT SERVICE
 
     #Remove war file after move to archive
-    echo "Wait for Jenkins to deploy"
+#    echo "Wait for Jenkins to deploy"
 
     # Deploy the WAR file to Tomcat
     # ...
     # Wait for deployment messages in the Tomcat logs
-    website="http:/192.168.43.130:8080/jenkins"
+#    website="http:/192.168.43.130:8080/jenkins"
     # Specify the username and password for authentication
-    username="admin"
-    password="admin"
+#    username="admin"
+#    password="admin"
 
     # Send a request to the website with authentication and check the response code
-    response=$(curl -sL -w "%{http_code}" -u "$username:$password" "$website" -o /dev/null)
-    echo $response
-    while [ "$response" -eq 200  ]
-    do
-	    sleep 1
-    done 
-    echo "Jenkins has been deployed. Website is online now."
+#    response=$(curl -sL -w "%{http_code}" -u "$username:$password" "$website" -o /dev/null)
+#    echo $response
+#    while [ "$response" -eq 200  ]
+#    do
+#	    sleep 1
+#    done 
+#    echo "Jenkins has been deployed. Website is online now."
     # Deploy the WAR file to Tomcat
 
 fi
