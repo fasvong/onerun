@@ -66,19 +66,6 @@ then
     exit 1
 else
     # Find the PID of TOMCAT and kill
-    PID=$(pgrep java)
-    
-    if [ -z "$PID" ]; 
-    then
-        echo "Tomcat process is not running."
-    else
-        echo "Process PID: $PID"
-        # Kill the process
-        kill "$PID"
-        echo "Tomcat process has been killed."
-    fi
-    # Find the PID of TOMCAT and kill
-    
     #TOMCAT
     TOMCATPATH=$HOME/tomcat9
 
