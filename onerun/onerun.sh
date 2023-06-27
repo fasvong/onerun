@@ -85,6 +85,19 @@ else
     if [ -d $TOMCATPATH ]
     then
         echo "Directory exists!"
+	# Find the PID of TOMCAT and kill
+    	PID=$(pgrep java)
+	if [ -z "$PID" ];
+    	then
+		echo "Tomcat process is not running."
+    	else
+		echo "Stop Tomcat service!"
+		# Kill the process
+		$TOMCATPATH/bin/shutdown.sh
+		echo "Tomcat process has been stopped."
+	fi
+    	# Find the PID of TOMCAT and kill
+
     else
         mkdir $TOMCATPATH
     fi
